@@ -1,5 +1,27 @@
 {
+  "name": "wordle",
+  "version": "1.0.0",
+  "description": "A wordle cli game",
+  "main": "index.mjs",
   "dependencies": {
     "chalk": "^5.0.1"
-  }
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/danielebarbaro/wordle.git"
+  },
+  "keywords": [
+    "wordle",
+    "game",
+    "game-cli"
+  ],
+  "author": "Daniele Barbaro",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/danielebarbaro/wordle/issues"
+  },
+  "homepage": "https://github.com/danielebarbaro/wordle#readme"
 }
