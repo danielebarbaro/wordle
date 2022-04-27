@@ -23,28 +23,50 @@ let attempt = 0 // contatore dei tentativi
 let maxGameAttempt = 6; // abbiamo 6 tentativi per risolvere una parola
 let wordGameLength = 4; // la parola deve esser lunga al max 4
 
+
 // Soluzione statica a fine didattico.
-const solution = 'CODE';
+const solution = 'SARA';
 
 // funzione di verifica
 const wordChecker = function (word, solution) {
     let success = [];
     let result = [];
 
+
     // ATTENZIONE ALLE PAROLE maiuscole/minuscole.
+    word = word.toLowerCase();
+    solution = solution.toLowerCase();
 
     // controllo lettera per lettera in parola
     for (let index in word) {
         // VERDE: la lettera è contenuta nella parola nella posizione giusta
         // GIALLO: la lettera è contenuta nella parola ma NON nella posizione giusta
         // GRIGIO: la lettera non è contenuta nella parola
+
+        let letter = word.charAt(index)
+        let trueLetter = solution.charAt(index)
+        let count=0;
+        for(let j=0;j<wordGameLength;j++)
+            if(letter.includes(solution[j]) && j!=index)
+                count++
+        if(letter===trueLetter){
+            result.push(chalk.green(letter.toUpperCase()))
+            success.push(true);
+        }
+        else if(count!=0)
+            result.push(chalk.yellow(letter.toUpperCase()))
+        else    
+            result.push(chalk.grey(letter.toUpperCase()))
+        
     }
+
 
     // ritorno un risultato composto dalle lettere colorate e da un success booleano
     // per fare uscire dal gioco se l'utente indovina la parola
+
     return {
-        'data': '',
-        'success': true
+        'data': result.join(' '),
+        'success': success.length===word.length
     }
 }
 
@@ -57,26 +79,28 @@ const game = function (attempt, max) {
         if (answer === 'exit') {
             return rl.close();
         }
+        
 
         // controlla di aver inserito esattamente wordGameLength caratteri altrimenti dai un errore
-        // if (condition) {
-        //      console.log('\n', chalk.red(`Devi inserire ${wordGameLength} caratteri.`));
-        // }
+        if (answer.length<wordGameLength || answer.length>wordGameLength) {
+            console.log('\n', chalk.red(`Devi inserire ${wordGameLength} caratteri.`));
+        }
+
+    let result =  wordChecker(answer, solution)
+
+    console.log('\n', `Tentativo ${attempt+1} di ${max}`);
+    ++attempt;
 
 
-        console.log('\n', `Tentativo ${attempt} di ${max}`);
-        ++attempt;
+        if (result.success) {
+            console.log(chalk.green(' >> HAI VINTO << '));
+            return rl.close();
+        }
 
-
-        // if (condition) {
-        //     console.log(chalk.green(' >> HAI VINTO << '));
-        //     return rl.close();
-        // }
-
-        // if (condition) {
-        //     console.log('\n', chalk.red(`Spiacente hai terminato i ${counter} tentativi. La soluzione era ${solution}`), '\n');
-        //     return rl.close();
-        // }
+        if (attempt>5) {
+            console.log('\n', chalk.red(`Spiacente, hai terminato i ${attempt} tentativi. La soluzione era ${chalk.green.underline(solution)}`), '\n');
+            return rl.close();
+        }
 
         // Richiamo la funzione fino a esaurimento dei tentativi
         game(attempt, maxGameAttempt);
@@ -84,8 +108,6 @@ const game = function (attempt, max) {
 }
 
 game(attempt, maxGameAttempt);
-
-
 
 
 
