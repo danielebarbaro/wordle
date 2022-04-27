@@ -10,6 +10,13 @@
  *
  * */
 
+/*
+Purtroppo al momento della compilazione non mi stampa la parola colorata. 
+Se al posto di result.push mettessi console.log le lettere uscirebbero, ma ovviamente su righe diverse. 
+Non capisco dove sia l'errore. 
+La funzione push l'ho vista ieri dal suo esercizio, quindi magari non l'ho semplicemente composta nel modo corretto
+*/
+
 import chalk from 'chalk';
 import readline from 'readline';
 
