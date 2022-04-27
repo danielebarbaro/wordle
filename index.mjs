@@ -11,10 +11,7 @@
  * */
 
 /*
-Purtroppo al momento della compilazione non mi stampa la parola colorata. 
-Se al posto di result.push mettessi console.log le lettere uscirebbero, ma ovviamente su righe diverse. 
-Non capisco dove sia l'errore. 
-La funzione push l'ho vista ieri dal suo esercizio, quindi magari non l'ho semplicemente composta nel modo corretto
+Non so se è la soluzione più ottimale, ma almeno ora funziona
 */
 
 import chalk from 'chalk';
@@ -66,13 +63,14 @@ const wordChecker = function (word, solution) {
             result.push(chalk.grey(letter.toUpperCase()))
         
     }
-
+    //Con questo console.log funziona, ma non capisco bene perchè col return non va.
+    //Non capisco bene perchè ciò succeda
+    console.log(result.join(' '))
 
     // ritorno un risultato composto dalle lettere colorate e da un success booleano
     // per fare uscire dal gioco se l'utente indovina la parola
-
+    
     return {
-        'data': result.join(' '),
         'success': success.length===word.length
     }
 }
@@ -82,22 +80,24 @@ const game = function (attempt, max) {
     // https://nodejs.org/api/readline.html#rlquestionquery-options-callback
     rl.question(chalk.blue(`Inserisci una parola di ${wordGameLength} caratteri: `), function (answer) {
 
+
+    console.log('\n', `Tentativo ${attempt+1} di ${max}`);
+    ++attempt;
+        
         // usiamo una safe word per uscire dal ciclo
         if (answer === 'exit') {
             return rl.close();
         }
         
-
+    let result =  wordChecker(answer, solution) 
         // controlla di aver inserito esattamente wordGameLength caratteri altrimenti dai un errore
         if (answer.length<wordGameLength || answer.length>wordGameLength) {
             console.log('\n', chalk.red(`Devi inserire ${wordGameLength} caratteri.`));
         }
+        else
+            console.log(result)
 
-    let result =  wordChecker(answer, solution)
-
-    console.log('\n', `Tentativo ${attempt+1} di ${max}`);
-    ++attempt;
-
+    
 
         if (result.success) {
             console.log(chalk.green(' >> HAI VINTO << '));
