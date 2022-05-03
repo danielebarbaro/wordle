@@ -4,7 +4,9 @@
   "description": "A wordle cli game",
   "main": "index.mjs",
   "dependencies": {
-    "chalk": "^5.0.1"
+    "axios": "^0.27.2",
+    "chalk": "^5.0.1",
+    "dotenv": "^16.0.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

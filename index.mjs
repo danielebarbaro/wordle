@@ -12,6 +12,27 @@
 
 import chalk from 'chalk';
 import readline from 'readline';
+import axios from 'axios';
+import 'dotenv/config';
+
+const randomWord = function () {
+    const options = {
+        method: 'GET',
+        url: 'https://random-words5.p.rapidapi.com/getMultipleRandom',
+        params: {count: '5', minLength: '3', maxLength: '4'},
+        headers: {
+            'X-RapidAPI-Host': process.env.APIHOST,
+            'X-RapidAPI-Key': process.env.APIKEY
+        }
+    };
+
+    return axios.request(options)
+        .then(function (response) {
+            return response.data.filter(w => w.length === 4).shift();
+        }).catch(function (error) {
+            console.error(error);
+        });
+}
 
 // https://nodejs.org/api/readline.html#readlinecreateinterfaceoptions
 const rl = readline.createInterface({
@@ -24,7 +45,8 @@ let maxGameAttempt = 6; // abbiamo 6 tentativi per risolvere una parola
 let wordGameLength = 4; // la parola deve esser lunga al max 4
 
 // Soluzione statica a fine didattico.
-const solution = 'code';
+let solution = 'code';
+solution = await randomWord();
 
 // funzione di verifica
 const wordChecker = function (word, solution) {
@@ -71,6 +93,7 @@ const game = function (attempt, max) {
     // https://nodejs.org/api/readline.html#rlquestionquery-options-callback
     rl.question(chalk.blue(`Inserisci una parola di ${wordGameLength} caratteri: `), function (answer) {
 
+        // console.log(solution)
         // usiamo una safe word per uscire dal ciclo
         if (answer === 'exit') {
             return rl.close();
