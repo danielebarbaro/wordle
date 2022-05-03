@@ -15,22 +15,32 @@ import readline from 'readline';
 import axios from 'axios';
 import 'dotenv/config';
 
+let attempt = 0 // contatore dei tentativi
+let maxGameAttempt = 6; // abbiamo 6 tentativi per risolvere una parola
+let wordGameLength = 4; // la parola deve esser lunga al max 4
+
 const randomWord = function () {
+    // https://rapidapi.com/sheharyar566/api/random-words5/
     const options = {
         method: 'GET',
         url: 'https://random-words5.p.rapidapi.com/getMultipleRandom',
-        params: {count: '5', minLength: '3', maxLength: '4'},
+        params: {count: '5', minLength: wordGameLength - 1, maxLength: wordGameLength},
         headers: {
             'X-RapidAPI-Host': process.env.APIHOST,
             'X-RapidAPI-Key': process.env.APIKEY
         }
     };
 
-    return axios.request(options)
+    return axios
+        .request(options)
         .then(function (response) {
-            return response.data.filter(w => w.length === 4).shift();
-        }).catch(function (error) {
-            console.error(error);
+            // console.log('risultato', response.data);
+            // console.log('risultato filtrato solo parole = 4', response.data.filter(word => word.length === wordGameLength));
+            // console.log('parola da indovinare', response.data.filter(word => word.length === wordGameLength).shift())
+            return response.data.filter(word => word.length === wordGameLength).shift();
+        })
+        .catch(function (error) {
+            console.error('ERRORE: ', error.response.data.message);
         });
 }
 
@@ -39,10 +49,6 @@ const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
 })
-
-let attempt = 0 // contatore dei tentativi
-let maxGameAttempt = 6; // abbiamo 6 tentativi per risolvere una parola
-let wordGameLength = 4; // la parola deve esser lunga al max 4
 
 // Soluzione statica a fine didattico.
 let solution = 'code';
