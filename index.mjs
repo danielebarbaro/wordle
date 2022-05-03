@@ -24,7 +24,7 @@ let maxGameAttempt = 6; // abbiamo 6 tentativi per risolvere una parola
 let wordGameLength = 4; // la parola deve esser lunga al max 4
 
 // Soluzione statica a fine didattico.
-const solution = 'CODE';
+const solution = 'code';
 
 // funzione di verifica
 const wordChecker = function (word, solution) {
@@ -34,14 +34,19 @@ const wordChecker = function (word, solution) {
     word = word.toLowerCase();
     solution = solution.toLowerCase();
 
+    let solutionWordCounter = wordCounter(solution);
+
     for (let index = 0; index < word.length; index++) {
         let wordLetter = word.charAt(index);
         let solutionLetter = solution.charAt(index);
-        if (wordLetter === solutionLetter) {
-            result.push(chalk.green(wordLetter.toUpperCase()));
-            success.push(true);
-        } else if (solution.indexOf(wordLetter) !== -1) {
-            result.push(chalk.yellow(wordLetter.toUpperCase()));
+        if (solutionWordCounter[wordLetter] > 0) {
+            if (wordLetter === solutionLetter) {
+                result.push(chalk.green(wordLetter.toUpperCase()));
+                success.push(true);
+            } else if (solution.indexOf(wordLetter) !== -1 && solutionWordCounter[wordLetter] > 0) {
+                result.push(chalk.yellow(wordLetter.toUpperCase()));
+            }
+            solutionWordCounter[wordLetter]--
         } else {
             result.push(chalk.gray(wordLetter.toUpperCase()));
         }
@@ -51,6 +56,14 @@ const wordChecker = function (word, solution) {
         'data': result.join(' '),
         'success': success.length === word.length
     }
+}
+
+const wordCounter = function (str) {
+    let res = [];
+    for (let s of str) {
+        res[s] ? res[s]++ : res[s] = 1;
+    }
+    return res;
 }
 
 // funzione di Gioco
@@ -69,17 +82,16 @@ const game = function (attempt, max) {
             game(attempt, maxGameAttempt);
         } else {
             ++attempt;
+            console.log('\n', `Tentativo ${attempt} di ${max}`);
+            let result = wordChecker(answer, solution);
+            console.log('\t', result.data);
+
+            if (result.success) {
+                console.log(chalk.green(' >> HAI VINTO << '));
+                return rl.close();
+            }
         }
 
-        console.log('\n', `Tentativo ${attempt} di ${max}`);
-        let result = wordChecker(answer, solution);
-        console.log('\t', result.data);
-
-
-        if (result.success) {
-            console.log(chalk.green(' >> HAI VINTO << '));
-            return rl.close();
-        }
 
         if (attempt === max) {
             console.log('\n', chalk.red(`Spiacente hai terminato i ${attempt} tentativi. La soluzione era ${solution}`), '\n');
