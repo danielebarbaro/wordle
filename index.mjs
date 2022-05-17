@@ -19,7 +19,7 @@ let attempt = 0 // contatore dei tentativi
 let maxGameAttempt = 6; // abbiamo 6 tentativi per risolvere una parola
 let wordGameLength = 4; // la parola deve esser lunga al max 4
 
-const randomWord = function () {
+const randomWord = async function () {
     // https://rapidapi.com/sheharyar566/api/random-words5/
     const options = {
         method: 'GET',
@@ -31,17 +31,12 @@ const randomWord = function () {
         }
     };
 
-    return axios
-        .request(options)
-        .then(function (response) {
-            // console.log('risultato', response.data);
-            // console.log('risultato filtrato solo parole = 4', response.data.filter(word => word.length === wordGameLength));
-            // console.log('parola da indovinare', response.data.filter(word => word.length === wordGameLength).shift())
-            return response.data.filter(word => word.length === wordGameLength).shift();
-        })
-        .catch(function (error) {
-            console.error('ERRORE: ', error.response.data.message);
-        });
+    try {
+        const response = await axios.request(options)
+        return response?.data.filter(word => word.length === wordGameLength).shift();
+    } catch (error) {
+        console.error('ERRORE: ', error.response.data.message);
+    }
 }
 
 // https://nodejs.org/api/readline.html#readlinecreateinterfaceoptions
