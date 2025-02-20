@@ -12,8 +12,11 @@
 
 import chalk from 'chalk';
 import readline from 'readline';
-import axios from 'axios';
 import 'dotenv/config';
+
+let attempt = 0;
+let maxGameAttempt;
+let wordGameLength;
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -21,53 +24,48 @@ const rl = readline.createInterface({
 });
 
 const askQuestion = (question) => {
-    return new Promise((resolve) => rl.question(chalk.blue(question), (answer) => resolve(answer.trim())));
+    return new Promise((resolve) => rl.question(chalk.gray(question), (answer) => resolve(parseInt(answer.trim()))));
 };
 
-let attempt = 0;
-let maxGameAttempt;
-let wordGameLength;
+const randomWord = async function (wordLength, wordGameLength = 4) {
+    const url = `https://random-words5.p.rapidapi.com/getMultipleRandom?count=10&minLength=${wordLength}&maxLength=${wordLength}`;
 
-const randomWord = function (wordLength) {
-    const options = {
-        method: 'GET',
-        url: 'https://random-words5.p.rapidapi.com/getMultipleRandom',
-        params: {count: '5', minLength: wordLength, maxLength: wordLength},
-        headers: {
-            'X-RapidAPI-Host': process.env.APIHOST,
-            'X-RapidAPI-Key': process.env.APIKEY
-        }
-    };
-
-    return axios
-        .request(options)
-        .then(function (response) {
-            // console.log('risultato', response.data);
-            // console.log('risultato filtrato solo parole = 4', response.data.filter(word => word.length === wordGameLength));
-            // console.log('parola da indovinare', response.data.filter(word => word.length === wordGameLength).shift())
-            return response.data.filter(word => word.length === wordGameLength).shift();
-        })
-        .catch(function (error) {
-            console.error('ERRORE: ', error.response.data.message);
+    try {
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'X-RapidAPI-Host': process.env.APIHOST,
+                'X-RapidAPI-Key': process.env.APIKEY
+            }
         });
+
+        if (!response.ok) {
+            console.error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data.filter(word => word.length === wordGameLength).shift();
+    } catch (error) {
+        console.error('ERRORE:', error.message);
+    }
 }
 
 const wordChecker = function (word, solution) {
     let success = [];
     let result = [];
-    word = word.toLowerCase();
-    solution = solution.toLowerCase();
     let solutionWordCounter = wordCounter(solution);
 
-    for (let index = 0; index < word.length; index++) {
-        let wordLetter = word.charAt(index);
-        let solutionLetter = solution.charAt(index);
+    solution = solution.toLowerCase();
+    word = word.toLowerCase();
 
+    for (let index in word) {
+        let wordLetter = word[index];
+        let solutionLetter = solution[index];
         if (solutionWordCounter[wordLetter] > 0) {
             if (wordLetter === solutionLetter) {
                 result.push(chalk.green(wordLetter.toUpperCase()));
                 success.push(true);
-            } else if (solution.indexOf(wordLetter) !== -1 && solutionWordCounter[wordLetter] > 0) {
+            } else {
                 result.push(chalk.yellow(wordLetter.toUpperCase()));
             }
             solutionWordCounter[wordLetter]--;
@@ -82,12 +80,12 @@ const wordChecker = function (word, solution) {
     };
 };
 
-const wordCounter = function (str) {
-    let res = {};
-    for (let s of str) {
-        res[s] ? res[s]++ : res[s] = 1;
+const wordCounter = function (word) {
+    let dictionary = {};
+    for (let letter of word) {
+        dictionary[letter] ? dictionary[letter]++ : dictionary[letter] = 1;
     }
-    return res;
+    return dictionary;
 };
 
 const game = function (attempt, max, solution) {
@@ -117,15 +115,15 @@ const game = function (attempt, max, solution) {
     });
 };
 
-const initGame = async () => {
-    maxGameAttempt = parseInt(await askQuestion('Quanti tentativi vuoi fare? (default 6) ')) || 6;
-    wordGameLength = parseInt(await askQuestion('Quanto deve essere lunga la parola? (default 4) ')) || 4;
+const start = async () => {
+    maxGameAttempt = await askQuestion('Quanti tentativi vuoi fare? (default 6) ') || 6;
+    wordGameLength = await askQuestion('Quanto deve essere lunga la parola? (default 4) ') || 4;
 
-    console.log(`\nGenerando una parola casuale di ${wordGameLength} lettere...\n`);
-    let solution = await randomWord(wordGameLength);
+    console.log(`\nSto generando una parola casuale di ${wordGameLength} lettere da risolvere in ${maxGameAttempt} tentativi...\n`);
+    let solution = await randomWord(wordGameLength, wordGameLength);
     console.log(chalk.green('La parola è stata generata! Buona fortuna! \n'));
 
     game(attempt, maxGameAttempt, solution);
 };
 
-initGame();
+await start();
